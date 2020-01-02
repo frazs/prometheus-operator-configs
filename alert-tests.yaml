@@ -16,3 +16,5 @@ spec:
       expr: vector(1)
     - alert: ExampleAlert2
       expr: vector(1)
+    - alert: NodeGreyFailure # EHashman's example, may need to adjust for what's unusual 
+      expr: scrape_duration_seconds{job="node"} > 2
