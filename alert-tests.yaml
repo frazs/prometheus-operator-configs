@@ -3,14 +3,16 @@ kind: PrometheusRule
 metadata:
   creationTimestamp: null
   labels:
-    prometheus: example
+    prometheus: alert-tests
     role: alert-rules
     app: prometheus-operator
     release: prometheus-operator
-  name: prometheus-example-rules
+  name: prometheus-alert-tests
 spec:
   groups:
-  - name: ./example.rules
+  - name: alert-tests.rules
     rules:
     - alert: ExampleAlert
+      expr: vector(1)
+    - alert: ExampleAlert2
       expr: vector(1)
