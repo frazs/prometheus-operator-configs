@@ -14,7 +14,9 @@ spec:
     rules:
     - alert: ExampleAlert
       expr: vector(1)
-    - alert: ExampleAlert2
+    - alert: SlackTest
       expr: vector(1)
+      labels:
+        severity: slack
     - alert: NodeGreyFailure # EHashman's example, may need to adjust for what's unusual 
       expr: scrape_duration_seconds{job="node"} > 2
