@@ -1,5 +1,4 @@
 #alertmanager configuration secret
-#kubectl create secret generic alertmanager-prometheus-operator-alertmanager --from-file=alertmanager.yaml --dry-run -o yaml | kubectl apply -f -
 #To-do: Pipeline this?
 global:
   resolve_timeout: 5m
