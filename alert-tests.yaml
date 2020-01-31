@@ -1,3 +1,4 @@
+#kubectl apply -f alert-tests.yaml -n monitoring
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -17,6 +18,11 @@ spec:
     - alert: SlackTest
       expr: vector(1)
       labels:
-        severity: slack
+        severity: critical
     - alert: NodeGreyFailure # EHashman's example, may need to adjust for what's unusual 
       expr: scrape_duration_seconds{job="node"} > 2
+      labels:
+        severity: critical
+      annotations:
+        summary: "High scrape duration on {{ $labels.instance }}"
+        description: "{{ $labels.instance }} has a scrape duration over 2s (current value: {{ $value }}s)"

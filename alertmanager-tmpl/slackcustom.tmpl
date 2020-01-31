@@ -1,0 +1,21 @@
+{{ define "slack.slackcustom.title" }}
+'[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
+{{end}}
+
+{{ define "slack.slackcustom.text" }}
+  {{ with index .Alerts 0 -}}
+    :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>* {{- if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end -}}
+  {{ end -}}
+  {{ range .Alerts }}
+  {{ .Annotations.message }}
+    {{ range .Labels.SortedPairs -}}
+      {{ if eq .Name "alertname" -}}
+      {{ else if eq .Name "endpoint" -}}
+      {{ else if eq .Name "prometheus" -}}
+      {{ else if eq .Name "severity" -}}
+      {{ else }}  • *{{ .Name }}:* `{{ .Value }}` 
+      {{ end }}
+    {{- end }}
+  {{- end }}
+{{ end }}
+
