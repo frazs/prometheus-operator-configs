@@ -2,14 +2,14 @@
 
 For the Prometheus Operator: Custom Prometheus rules and AlertManager configurations. In active early development. 
 
-**Ready** \
+**Ready** 
 - Figured out how to apply rules
 - Figured out how to apply configurations
 - AlertManager sending alerts to Slack (currently all dev cluster criticals to Cloud Slack #prometheus-alerts)
 - Slack alerts formatted for readability and useful detail
 - Tagged originating cluster to alerts (requires modifying the Prometheus Operator terraform script)
 
-**Upcoming** \
+**Upcoming** 
 - Useful custom rules
 - Grafana dashboards
 - Pipelines
@@ -36,7 +36,9 @@ An example usecase for this is to differentiate multiple clusters' AlertManagers
 **To apply AlertManager configuration**:
 
 ```
-kubectl create secret generic alertmanager-prometheus-operator-alertmanager --from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml --dry-run | awk '{if(NR>1)print}')" --from-file=alertmanager-tmpl/slackcustom.tmpl --dry-run -o yaml | kubectl apply -f -
+kubectl create secret generic alertmanager-prometheus-operator-alertmanager \
+--from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml --dry-run | awk '{if(NR>1)print}')" \
+--from-file=alertmanager-tmpl/slackcustom.tmpl --dry-run -o yaml | kubectl apply -f -
 ```
 
 alertmanager-config-overrides.yaml above is gitignored and intended for personalized private elements such as API keys.
