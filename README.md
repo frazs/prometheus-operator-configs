@@ -1,6 +1,6 @@
-# prometheus-rules
+# prometheus-operator-configs
 
-For the Prometheus Operator: Custom Prometheus rules and AlertManager configurations. In active early development. 
+Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager, and Grafana. In active early development, primarily on the development cluster. 
 
 **Ready** 
 - Figured out how to apply rules
@@ -9,14 +9,14 @@ For the Prometheus Operator: Custom Prometheus rules and AlertManager configurat
 - Slack alerts formatted for readability and useful detail
 - Tagged originating cluster to alerts (requires modifying the Prometheus Operator terraform script)
 
+**In Progress**
+- Multi-cluster Grafana (requires modifying the Prometheus Operator terraform script)
+
 **Upcoming** 
-- Useful custom rules
-- Grafana dashboards
+- Blackbox exporter ([& eventual refactor to upcoming BlackboxMonitor](https://github.com/coreos/prometheus-operator/pull/2832))
 - Pipelines
-- Blackbox settings ([BlackboxMonitor ready soon](https://github.com/coreos/prometheus-operator/pull/2832)
 - Port to other clusters
 - Other useful exporters (likely cluster-specific, e.g. GPU metrics for DAaaS)
-
 
 The following code snippets are listed for reference and will be pipelined. [kubens](https://github.com/ahmetb/kubectx) has been used to automaticaly apply them in the 'monitoring' namespace, so I'll need to double-check them with the appropriate -n flag placements. 
 
