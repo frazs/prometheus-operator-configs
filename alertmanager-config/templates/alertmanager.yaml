@@ -18,7 +18,7 @@ route:
   group_interval: 10m
   group_wait: 45s
   receiver: black_hole
-  repeat_interval: 24h
+  repeat_interval: 48h
   routes:
   - match:
       severity: critical
