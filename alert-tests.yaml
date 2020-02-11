@@ -1,4 +1,6 @@
 #kubectl apply -f alert-tests.yaml -n monitoring
+#ES rules adapted from https://awesome-prometheus-alerts.grep.to/rules#elasticsearch
+#^To do: confirm format and migrate to own file
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -13,16 +15,95 @@ spec:
   groups:
   - name: alert-tests.rules
     rules:
-    - alert: ExampleAlert
-      expr: vector(1)
-    - alert: SlackTest
-      expr: vector(1)
-      labels:
-        severity: critical
     - alert: NodeGreyFailure # EHashman's example, may need to adjust for what's unusual 
       expr: scrape_duration_seconds{job="node"} > 2
       labels:
+        severity: warning
+      annotations:
+        message: "{{ $labels.instance }} has a scrape duration over 2s (current value: {{ $value }}s)"
+  - name: elasticsearch-exporter.rules
+    rules:
+    - alert: ElasticHeapUsageTooHigh
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 90
+      for: 5m
+      labels:
         severity: critical
       annotations:
-        summary: "High scrape duration on {{ $labels.instance }}"
-        description: "{{ $labels.instance }} has a scrape duration over 2s (current value: {{ $value }}s)"
+        message: "Elastic heap usage on {{ $labels.instance }} is over 90% for 5m: {{ $value }}"
+    - alert: ElasticHeapUsageWarning
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        message: "Elastic heap usage on {{ $labels.instance }} is over 80% for 5m: {{ $value }}"
+    - alert: ElasticClusterRed
+      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        message: "Elastic cluster {{ $labels.instance }} is red"
+    - alert: ElasticClusterYellow
+      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        message: "Elastic cluster {{ $labels.instance }} is yellow"
+    - alert: ElasticClusterGreen
+      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      for: 5m
+      labels:
+        severity: info
+      annotations:
+        message: "Elastic cluster {{ $labels.instance }} is green. This is good! The exporter is working."
+    - alert: NumberOfElasticHealthyNodes
+      expr: elasticsearch_cluster_health_number_of_nodes < number_of_nodes
+      for: 5m
+      labels:
+        severity: critical
+      annotations: 
+        message: "Only {{ $value}} of Elastic Nodes are healthy (instance {{ $labels.instance }})."
+    - alert: NumberOfElasticHealthyDataNodes
+      expr: elasticsearch_cluster_health_number_of_data_nodes < number_of_data_nodes
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        message: "Only {{ $value}} of Elastic Data Nodes are healthy (instance {{ $labels.instance }})."
+    - alert: NumberOfRelocationShards
+      expr: elasticsearch_cluster_health_relocating_shards > 0
+      for: 20m
+      labels:
+        severity: critical
+      annotations:
+        message: "{{ $value }} shard(s) relocating over 20 min (instance {{ $labels.instance }})"
+    - alert: NumberOfInitializingShards
+      expr: elasticsearch_cluster_health_initializing_shards > 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        message: "{{ $value }} shard(s) initializing over 10 min (instance {{ $labels.instance }})"
+    - alert: NumberOfUnassignedShards
+      expr: elasticsearch_cluster_health_unassigned_shards > 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        message: "{{ $value }} shard(s) unassigned over 2 min (instance {{ $labels.instance }})"
+    - alert: NumberOfPendingTasks
+      expr: elasticsearch_cluster_health_number_of_pending_tasks > 0
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        message: "{{ $value }} tasks pending over 10 min (instance {{ $labels.instance }})"
+    - alert: ElasticNoNewDocuments
+      expr: rate(elasticsearch_indices_docs{es_data_node="true"}[10m]) < 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        message: "No no new documents over 10 min (instance {{ $labels.instance }})"
