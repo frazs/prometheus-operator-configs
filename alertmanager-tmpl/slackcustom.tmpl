@@ -1,21 +1,36 @@
+{{ define "slack.slackcustom.silence_url" -}}
+    {{ .ExternalURL }}/#/silences/new?filter=%7B
+    {{- range .CommonLabels.SortedPairs -}}
+        {{- if ne .Name "severity" -}}
+            {{- .Name }}%3D%22{{- .Value -}}%22%2C%20
+        {{- end -}}
+    {{- end -}}
+    severity%3D%22{{ .CommonLabels.severity }}%22%7D
+{{- end }}
+
 {{ define "slack.slackcustom.title" }}
-'[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
+[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
 {{end}}
 
 {{ define "slack.slackcustom.text" }}
-  {{ with index .Alerts 0 -}}
-    :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>* {{- if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end -}}
-  {{ end -}}
-  {{ range .Alerts }}
-  {{ .Annotations.message }}
-    {{ range .Labels.SortedPairs -}}
-      {{ if eq .Name "alertname" -}}
-      {{ else if eq .Name "endpoint" -}}
-      {{ else if eq .Name "prometheus" -}}
-      {{ else if eq .Name "severity" -}}
-      {{ else }}  • *{{ .Name }}:* `{{ .Value }}` 
-      {{ end }}
-    {{- end }}
+    :no_bell: *<{{ template "slack.slackcustom.silence_url" . }}|Silence>   *
+  {{- with index .Alerts 0 -}}
+    :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>* {{ if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end -}} 
   {{- end }}
-{{ end }}
 
+{{ range .Alerts }}
+{{- .Annotations.message }}
+
+  {{ if ne .Status "firing" -}}
+  {{ else }}  • *since:* `{{ .StartsAt.Format "02 Jan 15:04 UTC" }}`{{end}}
+    {{ range .Labels.SortedPairs -}}
+
+    {{ if eq .Name "alertname" -}}
+    {{ else if eq .Name "endpoint" -}}
+    {{ else if eq .Name "prometheus" -}}
+    {{ else if eq .Name "severity" -}}
+    {{ else }}• *{{ .Name }}:* `{{ .Value }}` 
+    {{ end }}
+    {{- end }}
+{{ end }}
+{{ end }}

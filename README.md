@@ -9,11 +9,13 @@ Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager
 - Slack alerts formatted for readability and useful detail
 - Tagged originating cluster to alerts (requires modifying the Prometheus Operator terraform script)
 - Multi-cluster Grafana (requires modifying the Prometheus Operator terraform script)
+- Slack Alert silence and timestamp
 
 **In Progress**
+- Elasticsearch exporter and rules
 - Exploring Grafana dashboards
 
-**Upcoming** 
+**Upcoming**
 - Blackbox exporter ([& eventual refactor to upcoming BlackboxMonitor](https://github.com/coreos/prometheus-operator/pull/2832))
 - Port to other clusters
 - Other useful exporters (likely cluster-specific, e.g. GPU metrics for DAaaS)
@@ -55,7 +57,7 @@ The data source changes are not applied automatically, but follow a reset throug
 
 ```
 kubectl create secret generic alertmanager-prometheus-operator-alertmanager \
---from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml --dry-run | awk '{if(NR>1)print}')" \
+--from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml | awk '{if(NR>1)print}')" \
 --from-file=alertmanager-tmpl/slackcustom.tmpl --dry-run -o yaml | kubectl apply -f -
 ```
 
