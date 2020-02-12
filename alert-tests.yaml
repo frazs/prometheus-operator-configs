@@ -23,6 +23,10 @@ spec:
         message: "{{ $labels.instance }} has a scrape duration over 2s (current value: {{ $value }}s)"
   - name: elasticsearch-exporter.rules
     rules:
+    - record: elasticsearch_filesystem_data_used_percent
+      expr: 100 * (elasticsearch_filesystem_data_size_bytes - elasticsearch_filesystem_data_free_bytes) / elasticsearch_filesystem_data_size_bytes
+    - record: elasticsearch_filesystem_data_free_percent
+      expr: 100 - elasticsearch_filesystem_data_used_percent
     - alert: ElasticHeapUsageTooHigh
       expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 90
       for: 5m
@@ -45,14 +49,14 @@ spec:
       annotations:
         message: "Elastic cluster {{ $labels.instance }} is red"
     - alert: ElasticClusterYellow
-      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      expr: elasticsearch_cluster_health_status{color="yellow"} == 1
       for: 5m
       labels:
         severity: warning
       annotations:
         message: "Elastic cluster {{ $labels.instance }} is yellow"
     - alert: ElasticClusterGreen
-      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      expr: elasticsearch_cluster_health_status{color="green"} == 1
       for: 5m
       labels:
         severity: info
