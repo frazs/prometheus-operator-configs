@@ -21,8 +21,7 @@
 {{ range .Alerts }}
 {{- .Annotations.message }}
 
-  {{ if ne .Status "firing" -}}
-  {{ else }}  • *since:* `{{ .StartsAt.Format "02 Jan 15:04 UTC" }}`{{end}}
+  {{ if eq .Status "firing" }}  • *since:* `{{ .StartsAt.Format "02 Jan 15:04 UTC" }}`{{else}}  • *resolved:* `{{ .EndsAt.Format "02 Jan 15:04 UTC" }}`{{end}}
     {{ range .Labels.SortedPairs -}}
 
     {{ if eq .Name "alertname" -}}
