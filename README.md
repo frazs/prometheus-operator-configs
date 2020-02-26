@@ -9,17 +9,19 @@ Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager
 - Slack alerts formatted for readability and useful detail
 - Tagged originating cluster to alerts (requires modifying the Prometheus Operator terraform script)
 - Multi-cluster Grafana (requires modifying the Prometheus Operator terraform script)
-- Slack Alert silence and timestamp
+- Slack alert silence, timestamps, grouping
+- Elasticsearch exporter and rules - one per cluster
 
 **In Progress**
-- Elasticsearch exporter and rules
+- Elasticsearch exporter and rules - multi-namespace
+- GPU metrics for DAaaS
 - Exploring Grafana dashboards
 
 **Upcoming**
 - Blackbox exporter ([& eventual refactor to upcoming BlackboxMonitor](https://github.com/coreos/prometheus-operator/pull/2832))
 - Port to other clusters
-- Other useful exporters (likely cluster-specific, e.g. GPU metrics for DAaaS)
-- Pipeline/Refactor
+- Other useful exporters? (likely cluster-specific)
+- Pipeline/refactor?
 
 The code snippets in the following notes are listed for reference and may later be pipelined or refactored. Note that they do not have any -n flags: [kubens](https://github.com/ahmetb/kubectx) has been used to automaticaly enforce the 'monitoring' namespace on kubectl.
 
