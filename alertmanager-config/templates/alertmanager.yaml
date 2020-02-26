@@ -14,9 +14,9 @@ receivers:
 # To do: come up with a low/info-severity route, or else configure Prometheus to not send low/info-severity to AlertManager.
 # Ref: https://github.com/prometheus/alertmanager/issues/428#issuecomment-468952018
 route:
-  group_by: ['alertname', 'job']
-  group_interval: 10m
-  group_wait: 45s
+  group_by: ['alertname', 'namespace']
+  group_interval: 24h
+  group_wait: 2m
   receiver: black_hole
   repeat_interval: 1w
   routes:
