@@ -23,5 +23,11 @@ route:
   - match:
       severity: supercritical
     receiver: cloud_slack
+# Don't alert generic NodeNotReady when there is a known cause
+inhibit_rules:
+  - target_match:
+      alertname: 'NodeNotReady'
+    source_match_re:
+      alertname: '(NodeDiskPressure|NodeMemoryPressure|NodePIDPressure|NodeMemoryPressure|NodeNetworkUnavailable)'
 templates:
 - '*.tmpl'
