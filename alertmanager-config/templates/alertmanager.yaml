@@ -21,7 +21,7 @@ route:
   repeat_interval: 1w
   routes:
   - match:
-      severity: critical
+      severity: supercritical
     receiver: cloud_slack
 templates:
 - '*.tmpl'
