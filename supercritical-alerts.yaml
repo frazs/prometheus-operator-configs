@@ -54,4 +54,14 @@ spec:
         severity: supercritical
       annotations:
         message: "{{ $labels.node }} is unscheduleable for over 1 hour. If it is healthy, is it cordoned?"
+  - name: supercritical-cert-alerts.rules
+    rules:
+    - alert: SSLCertExpiringSoon
+      expr: probe_ssl_earliest_cert_expiry{job="blackbox-exporter-prometheus-blackbox-exporter"} - time() < 86400 * 20
+      for: 2m
+      labels:
+        severity: supercritical
+      annotations:
+        message: "TEST ALERT: SSL certificate for {{ $labels.instance }} expires in less than 20 days."
+
 
