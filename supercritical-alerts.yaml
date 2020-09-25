@@ -62,6 +62,6 @@ spec:
       labels:
         severity: supercritical
       annotations:
-        message: "TEST ALERT: SSL certificate for {{ $labels.instance }} expires in less than 20 days."
+        message: "SSL certificate for {{ $labels.instance }} expires in less than 20 days."
 
 
