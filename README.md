@@ -1,29 +1,8 @@
 # prometheus-operator-configs
 
-Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager, and Grafana. In active early development, primarily on the development cluster. 
+Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager, Grafana, and various exporters. Work in progress.
 
-**Ready** 
-- Figured out how to apply rules
-- Figured out how to apply configurations
-- AlertManager sending alerts to Slack (currently all dev cluster criticals to Cloud Slack #prometheus-alerts)
-- Slack alerts formatted for readability and useful detail
-- Tagged originating cluster to alerts (requires modifying the Prometheus Operator terraform script)
-- Multi-cluster Grafana (requires modifying the Prometheus Operator terraform script)
-- Slack alert silence, timestamps, grouping
-- Elasticsearch exporter and rules - one per cluster
-
-**In Progress**
-- Elasticsearch exporter and rules - multi-namespace
-- GPU metrics for DAaaS
-- Exploring Grafana dashboards
-
-**Upcoming**
-- Blackbox exporter ([& eventual refactor to upcoming BlackboxMonitor](https://github.com/coreos/prometheus-operator/pull/2832))
-- Port to other clusters
-- Other useful exporters? (likely cluster-specific)
-- Pipeline/refactor?
-
-The code snippets in the following notes are listed for reference and may later be pipelined or refactored. Note that they do not have any -n flags: [kubens](https://github.com/ahmetb/kubectx) has been used to automaticaly enforce the 'monitoring' namespace on kubectl.
+The code snippets in the following notes are listed for reference and may later be pipelined or refactored. **Note that they do not include the -n flag**: on my end, [kubens](https://github.com/ahmetb/kubectx) is used to automaticaly enforce the 'monitoring' namespace on kubectl commands. 
 
 **To apply the cluster tag**, in the Prometheus Operator terraform script under prometheus.prometheusSpec, add: 
 
@@ -72,9 +51,10 @@ Creating a dry run of a secret and then applying it updates the existing secret 
 The output of a helm template command begins with a first line of "---". This breaks applying, so awk is used to remove it.
 
 
-Diverging from Helm chart best practices, the alertmanager.yaml template contains most of its values instead of those values being defined in values.yaml. This is due to two present helm template YAML issues: 
+Diverging from Helm chart best practices, the alertmanager.yaml template contains most of its values instead of those values being defined in values.yaml. This is due to two helm template YAML issues at the time of development: 
 
 1. A lot is defined in lists, and lists get overriden completely instead of partially (i.e. the entire nest is required)
 2. Retrieved URLS lose the quotes around them in a way that cannot be escaped, and the result cannot be parsed. If the URL is inside of a list, the quotes cannot be easily added after the fact: as per (1), the entire list is pulled in at once.
 
-(Low-priority to do: link relevant issues)
+**To create or reconfigure a blackbox exporter**:
+Refer to the [helm chart repo](https://github.com/helm/charts/tree/master/stable/prometheus-blackbox-exporter) and [sample configuration](blackbox-exporter/config.yaml). Note the labels for the Prometheus Operator to pick up the service. This will be deprecated after upgrading to Prometheus Operator 0.41 and replaced by Probe configurations. 
