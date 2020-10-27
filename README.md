@@ -42,7 +42,7 @@ kubectl create secret generic alertmanager-prometheus-operator-alertmanager \
 --from-file=alertmanager-tmpl/slackcustom.tmpl --dry-run -o yaml | kubectl apply -f -
 ```
 
-alertmanager-config-overrides.yaml above is gitignored and intended for personalized private elements such as API keys.
+alertmanager-config-overrides.yaml above is gitignored and intended for personalized private elements such as API keys and SMTP credentials. Its keys must match [alertmanger-config/values.yaml] when those values are used.
 
 The Prometheus Operator Alertmanager expects its configuarion as a base64 encoded secret (and "tmpl" template files used within the configuration are additional secrets). This makes it difficult to have those configurations themselves reference private variables. In order to allow the configuration to be shared publically and easily personalized, Helm templating is used to override private variables with private values. (To do: confirm how this works in the context of a pipeline)
 
