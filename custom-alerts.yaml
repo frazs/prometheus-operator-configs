@@ -75,7 +75,7 @@ spec:
         severity: medium
       annotations:
         message: '{{ $labels.nodename }} has {{ printf "%.2f" $value }}% available CPU.'
-  - name: certifacates.rules
+  - name: certificates.rules
     rules:
     - alert: SSLCertExpiringSoon
       expr: probe_ssl_earliest_cert_expiry{job="blackbox-exporter-prometheus-blackbox-exporter"} - time() < 86400 * 20
