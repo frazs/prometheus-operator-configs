@@ -12,12 +12,14 @@ receivers:
 - name: email
   email_configs:
   - to: {{ .Values.email_to | squote }}
-    require_tls: true
+    send_resolved: true
+    html: {{`'{{ template "email.email.html" . }}'`}}
 - name: cloud_slack
   slack_configs: 
   - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
     channel: '#prometheus-alerts'
     send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
     title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
     text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
 - name: black_hole #Empty default receiver
@@ -31,14 +33,14 @@ route:
   repeat_interval: 120h
   receiver: black_hole
   routes:
+  # Slack alerts
   - match_re:
       severity: medium|high
     continue: true
     receiver: cloud_slack
-  # Email alerts WIP/testing
+  # Email alerts
   - match:
-      # severity: high
-      alertname: 'off'
+      severity: high
     receiver: email
 # Don't alert generic NodeNotReady when there is a known cause
 inhibit_rules:
@@ -48,3 +50,4 @@ inhibit_rules:
       alertname: '(NodeDiskPressure|NodeMemoryPressure|NodePIDPressure|NodeMemoryPressure|NodeNetworkUnavailable)'
 templates:
 - '*.tmpl'
+- '*.html'

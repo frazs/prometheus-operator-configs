@@ -8,9 +8,13 @@
     severity%3D%22{{ .CommonLabels.severity }}%22%7D
 {{- end }}
 
+{{ define "slack.slackcustom.color" -}}
+{{- if eq .Status "resolved" }}good{{ else if eq .CommonLabels.cluster "k8s-cancentral-01-production" }}danger{{ else }}warning{{ end -}}
+{{- end }}
+
 {{ define "slack.slackcustom.title" }}
 [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
-{{end}}
+{{ end }}
 
 {{ define "slack.slackcustom.text" }}
     :no_bell: *<{{ template "slack.slackcustom.silence_url" . }}|Silence>   *
