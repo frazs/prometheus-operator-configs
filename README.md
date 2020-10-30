@@ -37,9 +37,7 @@ The data source changes are not applied automatically, but follow a reset throug
 **To apply AlertManager configuration**:
 
 ```
-kubectl create secret generic alertmanager-prometheus-operator-alertmanager \
---from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml | awk '{if(NR>1)print}')" \
---from-file=alertmanager-tmpl/slackcustom.tmpl --dry-run -o yaml | kubectl apply -f -
+kubectl create secret generic alertmanager-prometheus-operator-alertmanager --from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml | awk '{if(NR>1)print}')" --from-file=alertmanager-tmpl/slackcustom.tmpl --from-file=alertmanager-tmpl/email.html --dry-run -o yaml | kubectl apply -f -
 ```
 
 alertmanager-config-overrides.yaml above is gitignored and intended for personalized private elements such as API keys and SMTP credentials. Its keys must match [alertmanger-config/values.yaml](alertmanager-config/values.yaml) when those values are used.
