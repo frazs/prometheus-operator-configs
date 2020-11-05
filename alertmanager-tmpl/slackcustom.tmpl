@@ -29,7 +29,6 @@
     {{ range .Labels.SortedPairs -}}
 
     {{ if eq .Name "alertname" -}}
-    {{ else if eq .Name "endpoint" -}}
     {{ else if eq .Name "prometheus" -}}
     {{ else if eq .Name "severity" -}}
     {{ else }}• *{{ .Name }}:* `{{ .Value }}` 
