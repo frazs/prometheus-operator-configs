@@ -55,7 +55,7 @@ spec:
       annotations:
         message: '{{ $labels.node }} is unscheduleable for over 1 hour. If it is healthy, is it cordoned?'
     - alert: NodeLowMemory
-      expr: sum by (nodename) (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * on(instance,job) group_left(nodename) node_uname_info * 100) < 75
+      expr: sum by (nodename) (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * on(instance,job) group_left(nodename) node_uname_info * 100) < 15
       for: 5m
       labels:
         severity: medium
