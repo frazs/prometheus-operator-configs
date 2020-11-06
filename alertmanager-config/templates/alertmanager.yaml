@@ -42,12 +42,20 @@ route:
   - match:
       severity: high
     receiver: email
-# Don't alert generic NodeNotReady when there is a known cause
 inhibit_rules:
+  # Don't alert generic NodeNotReady when there is a known cause
   - target_match:
       alertname: 'NodeNotReady'
     source_match_re:
       alertname: '(NodeDiskPressure|NodeMemoryPressure|NodePIDPressure|NodeMemoryPressure|NodeNetworkUnavailable)'
+    equal: ['node']
+  - target_match:
+      alertname: 'NodeLowPodCapacity'
+    source_match:
+      alertname: 'NodePodsFull'
+    equal: ['node']
+  # To do: have pressure conditions inhibit corresponding low alerts once thresholds are stablished
+
 templates:
 - '*.tmpl'
 - '*.html'
