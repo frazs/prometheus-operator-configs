@@ -54,7 +54,7 @@ inhibit_rules:
     source_match:
       alertname: 'NodePodsFull'
     equal: ['node']
-    - target_match:
+  - target_match:
       alertname: 'NodepoolLowPodCapacity'
     source_match:
       alertname: 'NodepoolPodsFull'
