@@ -67,13 +67,13 @@ spec:
         severity: high
       annotations:
         message: '{{ $labels.node }} is not in a Ready state but did not trip a Network or Pressure condition.'
-    - alert: NodeUnscheduleable
+    - alert: NodeUnschedulable
       expr: sum by (node) (kube_node_spec_unschedulable{job="kube-state-metrics"}) == 1
       for: 1h
       labels:
         severity: high
       annotations:
-        message: '{{ $labels.node }} is unscheduleable for over 1 hour. If it is healthy, is it cordoned?'
+        message: '{{ $labels.node }} is unschedulable for over 1 hour. If it is healthy, is it cordoned?'
     - alert: NodePodsFull
       expr: 100 - (sum(kube_pod_info) by (node) / sum(kube_node_status_allocatable_pods) by (node) * 100) < 5
       for: 2m
