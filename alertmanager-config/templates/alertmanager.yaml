@@ -54,6 +54,11 @@ inhibit_rules:
     source_match:
       alertname: 'NodePodsFull'
     equal: ['node']
+    - target_match:
+      alertname: 'NodepoolLowPodCapacity'
+    source_match:
+      alertname: 'NodepoolPodsFull'
+    equal: ['label_agentpool']
   # To do: have pressure conditions inhibit corresponding low alerts once thresholds are stablished
 
 templates:
