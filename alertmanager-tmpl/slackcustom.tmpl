@@ -9,7 +9,7 @@
 {{- end }}
 
 {{ define "slack.slackcustom.color" -}}
-{{- if eq .Status "resolved" }}good{{ else if eq .CommonLabels.cluster "k8s-cancentral-01-production" }}danger{{ else }}warning{{ end -}}
+{{- if eq .Status "resolved" }}good{{ else if or (eq .CommonLabels.severity "high") (eq .CommonLabels.cluster "k8s-cancentral-01-production") }}danger{{ else }}warning{{ end -}}
 {{- end }}
 
 {{ define "slack.slackcustom.title" }}
