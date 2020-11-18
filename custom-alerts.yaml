@@ -118,5 +118,21 @@ spec:
         severity: high
       annotations:
         message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
+  - name: meta-alerts.rules
+    rules:
+    - alert: ManyAlertsFiring
+      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 50
+      for: 2m
+      labels:
+        severity: high
+      annotations:
+        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}!'
+    - alert: ManyAlertsFiring
+      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 20
+      for: 2m
+      labels:
+        severity: medium
+      annotations:
+        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}.'
 
 
