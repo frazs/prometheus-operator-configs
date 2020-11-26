@@ -13,7 +13,7 @@
 {{- end }}
 
 {{ define "slack.slackcustom.title" }}
-[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+[{{ .Status | toUpper }}:{{ if eq .Status "firing" }}{{ .Alerts.Firing | len }}{{ else }}{{ .Alerts.Resolved | len }}{{ end }}] {{ .CommonLabels.alertname }}
 {{ end }}
 
 {{ define "slack.slackcustom.text" }}
