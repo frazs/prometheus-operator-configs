@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: management-platform-alerts
+    role: management-paltform-alert-rules
+    app: prometheus-operator
+    release: prometheus-operator
+  name: management-platform-alerts
+spec:
+  groups:
+  - name: management.rules
+    rules:
+    - alert: BackupJobFailed
+      expr: sum by (job_name,namespace) (kube_job_failed{job_name=~".*backup.*"}) == 1
+      for: 2m
+      labels:
+        severity: high
+      annotations:
+        message: 'Job {{ $labels.job_name }} has failed in namespace {{ $labels.namespace }}!'
