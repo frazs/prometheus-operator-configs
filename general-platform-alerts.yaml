@@ -148,3 +148,12 @@ spec:
         severity: high
       annotations:
         message: 'Prometheus storage has {{ $value }} capacity remaining.'
+  - name: job.rules
+    rules:
+    - alert: JobsNotCleanedUp
+      expr: sum by (namespace) (kube_job_complete{condition="true"}) > 20
+      for: 1d
+      labels:
+        severity: medium
+      annotations:
+        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs.'
