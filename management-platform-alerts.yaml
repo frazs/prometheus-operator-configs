@@ -16,6 +16,6 @@ spec:
       expr: sum by (job_name,namespace) (kube_job_failed{job_name=~".*backup.*"}) == 1
       for: 2m
       labels:
-        severity: high
+        severity: major
       annotations:
         message: 'Job {{ $labels.job_name }} has failed in namespace {{ $labels.namespace }}!'
