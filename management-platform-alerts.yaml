@@ -17,5 +17,6 @@ spec:
       for: 2m
       labels:
         severity: major
+        resolves: never
       annotations:
         message: 'Job {{ $labels.job_name }} has failed in namespace {{ $labels.namespace }}!'
