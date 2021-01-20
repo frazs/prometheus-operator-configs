@@ -10,6 +10,40 @@ metadata:
   name: general-platform-alerts
 spec:
   groups:
+  - name: certificates.rules
+    rules:
+    - alert: SSLCertExpiringSoon
+      expr: sum by (target, instance) (probe_ssl_earliest_cert_expiry{job="blackbox-exporter-prometheus-blackbox-exporter"} - time()) < 86400 * 20
+      for: 2m
+      labels:
+        severity: urgent
+      annotations:
+        message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
+  # - name: job.rules
+  #   rules:
+  #   - alert: JobsNotCleanedUp
+  #     expr: count by (namespace) (kube_job_status_completion_time < (time() - 86400)) > 20
+  #     for: 2m
+  #     labels:
+  #       severity: major
+  #     annotations:
+  #       message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs.'
+  - name: meta-alerts.rules
+    rules:
+    - alert: ManyAlertsFiring
+      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 50
+      for: 2m
+      labels:
+        severity: urgent
+      annotations:
+        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}!'
+    - alert: ManyAlertsFiring
+      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 20
+      for: 2m
+      labels:
+        severity: major
+      annotations:
+        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}.'
   - name: nodepool-status.rules
     rules:
     - record: nodepool_allocatable_pods
@@ -111,31 +145,6 @@ spec:
         severity: minor
       annotations:
         message: '{{ $labels.node }} pod capacity is {{ printf "%.2f" $value }}% full.'
-  - name: certificates.rules
-    rules:
-    - alert: SSLCertExpiringSoon
-      expr: sum by (target, instance) (probe_ssl_earliest_cert_expiry{job="blackbox-exporter-prometheus-blackbox-exporter"} - time()) < 86400 * 20
-      for: 2m
-      labels:
-        severity: urgent
-      annotations:
-        message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
-  - name: meta-alerts.rules
-    rules:
-    - alert: ManyAlertsFiring
-      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 50
-      for: 2m
-      labels:
-        severity: urgent
-      annotations:
-        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}!'
-    - alert: ManyAlertsFiring
-      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 20
-      for: 2m
-      labels:
-        severity: major
-      annotations:
-        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}.'
   - name: prometheus-extended.rules
     rules:
     - alert: PrometheusStorageLow
@@ -148,12 +157,3 @@ spec:
         severity: urgent
       annotations:
         message: 'Prometheus storage has {{ $value }} capacity remaining.'
-  # - name: job.rules
-  #   rules:
-  #   - alert: JobsNotCleanedUp
-  #     expr: count by (namespace) (kube_job_status_completion_time < (time() - 86400)) > 20
-  #     for: 2m
-  #     labels:
-  #       severity: major
-  #     annotations:
-  #       message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs.'
