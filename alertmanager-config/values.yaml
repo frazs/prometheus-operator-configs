@@ -1,4 +1,6 @@
 cloud_slack_incoming_webhook: 'OVERRIDE ME WITH URL'
+test_slack_incoming_webhook: 'OVERRIDE ME WITH URL'
+test_slack_no_resolve_incoming_webhook: 'OVERRIDE ME WITH URL'
 email_to: 'OVERRIDE ME WITH EMAIL DESTINATION'
 test_email_to: 'OVERRIDE ME WITH TEST EMAIL DESTINATION'
 smtp_smarthost: 'OVERRIDE ME WITH SMTP HOST:PORT'

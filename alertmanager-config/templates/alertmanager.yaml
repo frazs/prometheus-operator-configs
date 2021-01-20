@@ -14,16 +14,50 @@ receivers:
   - to: {{ .Values.email_to | squote }}
     send_resolved: true
     html: {{`'{{ template "email.email.html" . }}'`}}
+- name: email_no_resolve
+  email_configs:
+  - to: {{ .Values.email_to | squote }}
+    send_resolved: false
+    html: {{`'{{ template "email.email.html" . }}'`}}
 - name: test_email
   email_configs:
   - to: {{ .Values.test_email_to | squote }}
     send_resolved: true
+    html: {{`'{{ template "email.email.html" . }}'`}}
+- name: test_email_no_resolve
+  email_configs:
+  - to: {{ .Values.test_email_to | squote }}
+    send_resolved: false
     html: {{`'{{ template "email.email.html" . }}'`}}
 - name: cloud_slack
   slack_configs: 
   - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
     channel: '#prometheus-alerts'
     send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cloud_slack_no_resolve
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#prometheus-alerts'
+    send_resolved: false
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: test_slack
+  slack_configs: 
+  - api_url: {{ .Values.test_slack_incoming_webhook | squote }}
+    channel: '#resolve'
+    send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: test_slack_no_resolve
+  slack_configs: 
+  - api_url: {{ .Values.test_slack_no_resolve_incoming_webhook | squote }}
+    channel: '#no-resolve'
+    send_resolved: false
     color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
     title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
     text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
@@ -39,19 +73,40 @@ route:
   receiver: black_hole
   routes:
   # Slack alerts
-  - match_re:
+  - receiver: cloud_slack
+    match_re:
       severity: major|urgent
+    routes:
+    - receiver: cloud_slack_no_resolve
+      match_re: 
+        resolves: never
     continue: true
-    receiver: cloud_slack
   # Email alerts
-  - match:
+  - receiver: email
+    match_re:
       severity: urgent
-    receiver: email
+    routes:
+    - receiver: email_no_resolve
+      match_re:
+        resolves: never
+  ### TESTING ROUTES
+  # Test Slack alerts
+  - receiver: test_slack
+    match_re:
+      severity: testing_major|testing_urgent
+    routes:
+    - receiver: test_slack_no_resolve
+      match_re: 
+        resolves: never
+    continue: true
   # Test email alerts
-  - match:
-      alertname: 'off'
-    receiver: test_email
-    repeat_interval: 10m
+  - receiver: test_email
+    match_re:
+      severity: testing_urgent
+    routes:
+    - receiver: test_email_no_resolve
+      match_re:
+        resolves: never
 inhibit_rules:
   # Don't alert generic NodeNotReady when there is a known cause
   - target_match:
