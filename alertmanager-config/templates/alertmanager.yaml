@@ -125,9 +125,9 @@ inhibit_rules:
       alertname: 'NodepoolPodsFull'
     equal: ['label_agentpool']
   - target_match:
-      severity: 'medium'
+      severity: 'major'
     source_match:
-      severity: 'high'
+      severity: 'urgent'
     equal: ['alertname', 'namespace']
   # To do: have pressure conditions inhibit corresponding low alerts once thresholds are stablished
 
