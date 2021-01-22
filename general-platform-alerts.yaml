@@ -30,20 +30,22 @@ spec:
   #       message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs.'
   - name: meta-alerts.rules
     rules:
-    - alert: ManyAlertsFiring
-      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 50
+    - record: alerts_firing
+      expr: sum without (alertname, alertstate) (label_replace(ALERTS{alertstate="firing",alertname!="ManyAlertsFiring"}, "alertfiring", "$1", "alertname", "(.*)"))
+    - alert: ManyManyAlertsFiring
+      expr: sum by(alertfiring, namespace) (alerts_firing) > 50
       for: 2m
       labels:
         severity: urgent
       annotations:
-        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}!'
+        message: '{{ $value }} instances of alert {{ $labels.alertfiring }} are firing in namespace {{ $labels.namespace }}!'
     - alert: ManyAlertsFiring
-      expr: sum by(alertname, namespace) (ALERTS{alertstate="firing"}) > 20
+      expr: sum by(alertfiring, namespace) (alerts_firing) > 20
       for: 2m
       labels:
         severity: major
       annotations:
-        message: '{{ $value }} instances of alert {{ $labels.alertname }} are firing in namespace {{ $labels.namespace }}.'
+        message: '{{ $value }} instances of alert {{ $labels.alertfiring }} are firing in namespace {{ $labels.namespace }}.'
   - name: nodepool-status.rules
     rules:
     - record: nodepool_allocatable_pods

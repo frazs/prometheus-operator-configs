@@ -125,11 +125,10 @@ inhibit_rules:
       alertname: 'NodepoolPodsFull'
     equal: ['label_agentpool']
   - target_match:
-      severity: 'major'
+      alertname: 'ManyAlertsFiring'
     source_match:
-      severity: 'urgent'
-    equal: ['alertname', 'namespace']
-  # To do: have pressure conditions inhibit corresponding low alerts once thresholds are stablished
+      alertname: 'ManyManyAlertsFiring'
+    equal: ['alertfiring', 'namespace']
 
 templates:
 - '*.tmpl'
