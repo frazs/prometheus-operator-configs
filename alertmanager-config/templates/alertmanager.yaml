@@ -132,15 +132,15 @@ inhibit_rules:
       alertname: 'ManyManyAlertsFiring'
     equal: ['alertfiring', 'namespace']
   - target_match:
-    alertname: 'VeleroBackupFailure'
-  source_match:
-    alertname: 'ContinuousVeleroBackupFailure'
-  equal: ['schedule']
+      alertname: 'VeleroBackupFailure'
+    source_match:
+      alertname: 'ContinuousVeleroBackupFailure'
+    equal: ['schedule']
   - target_match:
-    alertname: 'VeleroBackupPartialFailure'
-  source_match:
-    alertname: 'ContinuousVeleroBackupPartialFailure'
-  equal: ['schedule']
+      alertname: 'VeleroBackupPartialFailure'
+    source_match:
+      alertname: 'ContinuousVeleroBackupPartialFailure'
+    equal: ['schedule']
 
 templates:
 - '*.tmpl'
