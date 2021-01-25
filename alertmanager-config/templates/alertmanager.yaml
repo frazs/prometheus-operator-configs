@@ -65,6 +65,7 @@ receivers:
 # To do: come up with a low/info-severity route, or else configure Prometheus to not send low/info-severity to AlertManager.
 # Ref: https://github.com/prometheus/alertmanager/issues/428#issuecomment-468952018
 route:
+  ### MEMO: For multi-cluster AlertManager, group by 'cluster' too
   group_by: ['alertname', 'namespace']
   group_interval: 10m
   group_wait: 2m
@@ -107,6 +108,7 @@ route:
     - receiver: test_email_no_resolve
       match_re:
         resolves: never
+### MEMO: Add cluster to equal for multi-cluster AlertManager inhibitions
 inhibit_rules:
   # Don't alert generic NodeNotReady when there is a known cause
   - target_match:
@@ -129,6 +131,16 @@ inhibit_rules:
     source_match:
       alertname: 'ManyManyAlertsFiring'
     equal: ['alertfiring', 'namespace']
+  - target_match:
+    alertname: 'VeleroBackupFailure'
+  source_match:
+    alertname: 'ContinuousVeleroBackupFailure'
+  equal: ['schedule']
+  - target_match:
+    alertname: 'VeleroBackupPartialFailure'
+  source_match:
+    alertname: 'ContinuousVeleroBackupPartialFailure'
+  equal: ['schedule']
 
 templates:
 - '*.tmpl'
