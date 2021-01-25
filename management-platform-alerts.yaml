@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: null
   labels:
     prometheus: management-platform-alerts
-    role: management-paltform-alert-rules
+    role: management-platform-alert-rules
     app: prometheus-operator
     release: prometheus-operator
   name: management-platform-alerts
