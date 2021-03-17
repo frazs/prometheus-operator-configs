@@ -153,12 +153,12 @@ spec:
       expr: >-
         sum by (persistentvolumeclaim, namespace, node) 
         (kubelet_volume_stats_available_bytes{persistentvolumeclaim="prometheus-prometheus-operator-prometheus-db-prometheus-prometheus-operator-prometheus-0"}
-        /kubelet_volume_stats_capacity_bytes{persistentvolumeclaim="prometheus-prometheus-operator-prometheus-db-prometheus-prometheus-operator-prometheus-0"}) * 100 < 10
-      for: 2m
+        /kubelet_volume_stats_capacity_bytes{persistentvolumeclaim="prometheus-prometheus-operator-prometheus-db-prometheus-prometheus-operator-prometheus-0"}) * 100 < 15
+      for: 15m
       labels:
         severity: urgent
       annotations:
-        message: 'Prometheus storage has {{ $value }} capacity remaining.'
+        message: 'Prometheus storage has {{ printf "%.2f" $value }}% capacity remaining.'
   - name: velero.rules
     rules:
     - record: velero_schedule_failure_increment
