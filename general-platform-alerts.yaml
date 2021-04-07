@@ -60,10 +60,10 @@ spec:
       annotations:
         message: '{{ if eq $labels.label_agentpool ""}}Unpooled node{{ else }}Nodepool {{ $labels.label_agentpool }}{{end}} pod capacity is {{ printf "%.2f" $value }}% full!'
     - alert: NodepoolLowPodCapacity
-      expr: nodepool_allocated_pods/nodepool_allocatable_pods * 100 > 80
-      for: 5m
+      expr: nodepool_allocated_pods/nodepool_allocatable_pods * 100 > 85
+      for: 10m
       labels:
-        severity: urgent
+        severity: major
       annotations:
         message: '{{ if eq $labels.label_agentpool ""}}Unpooled node{{ else }}Nodepool {{ $labels.label_agentpool }}{{end}} pod capacity is {{ printf "%.2f" $value }}% full.'
   - name: node-status.rules
