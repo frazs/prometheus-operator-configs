@@ -23,11 +23,11 @@ spec:
     rules:
     - alert: JobsNotCleanedUp
       expr: count by (namespace) (kube_job_status_completion_time < (time() - 86400)) > 20
-      for: 2m
+      for: 15m
       labels:
         severity: major
       annotations:
-        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs.'
+        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h.'
   - name: meta-alerts.rules
     rules:
     - record: alerts_firing
