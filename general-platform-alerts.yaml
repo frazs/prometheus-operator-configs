@@ -199,13 +199,13 @@ spec:
       expr: sum by(schedule) (velero_backup_failure_total{schedule="velero-hourly-resources"} - velero_backup_failure_total{schedule="velero-hourly-resources"} offset 65m > 0)
       for: 15s
       labels:
-        severity: testing_urgent
+        severity: urgent
       annotations:
-        message: 'Repeating failure in hourly backup schedule {{ $labels.schedule }}!'
+        message: 'Hourly failure in backup schedule {{ $labels.schedule }}!'
     - alert: VeleroHourlyBackupPartialFailure
       expr: sum by(schedule) (velero_backup_partial_failure_total{schedule="velero-hourly-resources"} - velero_backup_partial_failure_total{schedule="velero-hourly-resources"} offset 65m > 0)
       for: 15s
       labels:
-        severity: testing_major
+        severity: major
       annotations:
-        message: 'Repeating partial failure in hourly backup schedule {{ $labels.schedule }}.'
+        message: 'Hourly partial failure in backup schedule {{ $labels.schedule }}.'
