@@ -17,6 +17,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
   - name: jobs.rules
@@ -28,6 +29,7 @@ spec:
       for: 15m
       labels:
         severity: major
+        scope: platform
       annotations:
         message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h ({{ $labels.total }}) total).'
   - name: meta-alerts.rules
@@ -39,6 +41,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: '{{ $value }} instances of alert {{ $labels.alertfiring }} are firing in namespace {{ $labels.namespace }}!'
     - alert: ManyAlertsFiring
@@ -46,6 +49,7 @@ spec:
       for: 2m
       labels:
         severity: major
+        scope: platform
       annotations:
         message: '{{ $value }} instances of alert {{ $labels.alertfiring }} are firing in namespace {{ $labels.namespace }}.'
   - name: nodepool-status.rules
@@ -59,6 +63,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: '{{ if eq $labels.label_agentpool ""}}Unpooled node{{ else }}Nodepool {{ $labels.label_agentpool }}{{end}} pod capacity is {{ printf "%.2f" $value }}% full!'
     - alert: NodepoolLowPodCapacity
@@ -66,6 +71,7 @@ spec:
       for: 10m
       labels:
         severity: major
+        scope: platform
       annotations:
         message: '{{ if eq $labels.label_agentpool ""}}Unpooled node{{ else }}Nodepool {{ $labels.label_agentpool }}{{end}} pod capacity is {{ printf "%.2f" $value }}% full.'
   - name: node-status.rules
@@ -77,6 +83,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'UNHEALTHY NODE: {{ $labels.node }} has critically low disk capacity.'
     - alert: NodeMemoryPressure
@@ -91,6 +98,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'UNHEALTHY NODE: Too many processes are running on {{ $labels.node }}.'
     - alert: NodeNetworkUnavailable
@@ -98,6 +106,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'UNHEALTHY NODE: The network for {{ $labels.node }} is not correctly configured.'
     - alert: NodeNotReady
@@ -105,6 +114,7 @@ spec:
       for: 2m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: '{{ $labels.node }} is not in a Ready state but did not trip a Network or Pressure condition.'
     - alert: NodeUnschedulable
@@ -112,6 +122,7 @@ spec:
       for: 1h
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: '{{ $labels.node }} is unschedulable for over 1 hour. If it is healthy, is it cordoned?'
     - alert: NodePodsFull
@@ -119,6 +130,7 @@ spec:
       for: 5m
       labels:
         severity: minor
+        scope: platform
       annotations:
         message: '{{ $labels.node }} pod capacity is {{ printf "%.2f" $value }}% full!'
     - alert: NodeLowMemory
@@ -126,6 +138,7 @@ spec:
       for: 10m
       labels:
         severity: minor
+        scope: platform
       annotations:
         message: '{{ $labels.nodename }} has {{ printf "%.2f" $value }}% available memory.'
     - alert: NodeLowDisk
@@ -133,6 +146,7 @@ spec:
       for: 5m
       labels:
         severity: major
+        scope: platform
       annotations:
         message: '{{ $labels.device }} on {{ $labels.nodename }} has {{ printf "%.2f" $value }}% available disk space.'
     - alert: NodeLowCPU
@@ -140,6 +154,7 @@ spec:
       for: 5m
       labels:
         severity: minor
+        scope: platform
       annotations:
         message: '{{ $labels.nodename }} has {{ printf "%.2f" $value }}% available CPU.'
     - alert: NodeLowPodCapacity
@@ -147,6 +162,7 @@ spec:
       for: 5m
       labels:
         severity: minor
+        scope: platform
       annotations:
         message: '{{ $labels.node }} pod capacity is {{ printf "%.2f" $value }}% full.'
   - name: prometheus-extended.rules
@@ -159,6 +175,7 @@ spec:
       for: 15m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'Prometheus storage has {{ printf "%.2f" $value }}% capacity remaining.'
   - name: velero.rules
@@ -173,6 +190,7 @@ spec:
       labels:
         severity: urgent
         resolves: never
+        scope: platform
       annotations:
         message: 'Failed backup in Velero schedule {{ $labels.schedule }}.'
     - alert: VeleroBackupPartialFailure
@@ -181,6 +199,7 @@ spec:
       labels:
         severity: urgent
         resolves: never
+        scope: platform
       annotations:
         message: 'Partially failed backup in Velero schedule {{ $labels.schedule }}.'
     - alert: ContinuousVeleroBackupFailure
@@ -188,6 +207,7 @@ spec:
       for: 10m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'Continuous failed backup in Velero schedule {{ $labels.schedule }}!'
     - alert: ContinuousVeleroBackupPartialFailure
@@ -195,6 +215,7 @@ spec:
       for: 10m
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'Continuous partially failed backup in Velero schedule {{ $labels.schedule }}!'
     - alert: VeleroHourlyBackupFailure
@@ -202,6 +223,7 @@ spec:
       for: 15s
       labels:
         severity: urgent
+        scope: platform
       annotations:
         message: 'Hourly failure in backup schedule {{ $labels.schedule }}!'
     - alert: VeleroHourlyBackupPartialFailure
@@ -209,5 +231,7 @@ spec:
       for: 15s
       labels:
         severity: major
+        scope: platform
       annotations:
         message: 'Hourly partial failure in backup schedule {{ $labels.schedule }}.'
+        

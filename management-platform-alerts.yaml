@@ -18,5 +18,6 @@ spec:
       labels:
         severity: urgent
         resolves: never
+        scope: platform
       annotations:
         message: 'Job {{ $labels.job_name }} has failed in namespace {{ $labels.namespace }}!'
