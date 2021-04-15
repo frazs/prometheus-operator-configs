@@ -22,16 +22,14 @@ spec:
         message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
   - name: jobs.rules
     rules:
-    - record: total_complete_jobs_per_namespace_label
-      expr: count_values without() ("total", count by(namespace) (kube_job_status_completion_time))
     - alert: CompletedJobsNotCleared
-      expr: (count by(namespace) (kube_job_status_completion_time < (time() - 86400)) > 20) * on(namespace) group_left(total) total_complete_jobs_per_namespace_label
+      expr: count by (namespace) (kube_job_status_completion_time < (time() - 86400)) > 20
       for: 15m
       labels:
         severity: major
         scope: platform
       annotations:
-        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h ({{ $labels.total }} total).'
+        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h.'
   - name: meta-alerts.rules
     rules:
     - record: alerts_firing
