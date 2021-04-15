@@ -31,7 +31,7 @@ spec:
         severity: major
         scope: platform
       annotations:
-        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h ({{ $labels.total }}) total).'
+        message: 'Namespace {{ $labels.namespace }} has {{ $value }} completed jobs older than 24h ({{ $labels.total }} total).'
   - name: meta-alerts.rules
     rules:
     - record: alerts_firing
