@@ -35,7 +35,7 @@ spec:
     - record: alerts_firing
       expr: sum without (alertname, alertstate) (label_replace(ALERTS{alertstate="firing",alertname!="ManyAlertsFiring",alertname!="ManyManyAlertsFiring"}, "alertfiring", "$1", "alertname", "(.*)"))
     - alert: ManyManyAlertsFiring
-      expr: sum by(alertfiring, namespace) (alerts_firing) > 50
+      expr: sum by(alertfiring, namespace) (alerts_firing{alertfiring!~"KubeJobCompletion|KubeJobFailed"}) > 50
       for: 2m
       labels:
         severity: urgent
@@ -43,7 +43,7 @@ spec:
       annotations:
         message: '{{ $value }} instances of alert {{ $labels.alertfiring }} are firing in namespace {{ $labels.namespace }}!'
     - alert: ManyAlertsFiring
-      expr: sum by(alertfiring, namespace) (alerts_firing) > 20
+      expr: sum by(alertfiring, namespace) (alerts_firing{alertfiring!~"KubeJobCompletion|KubeJobFailed"}) > 20
       for: 2m
       labels:
         severity: major
