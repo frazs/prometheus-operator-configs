@@ -22,7 +22,7 @@ spec:
       annotations:
         message: Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} restarted {{ $value }} times in the last 8 hours.
     - alert: ContainerWaiting
-      expr: sum by (container, pod, namespace, reason) (avg_over_time(kube_pod_container_status_waiting_reason[15m:])) > 0.8
+      expr: sum by (container, pod, namespace, reason) (avg_over_time(kube_pod_container_status_waiting_reason{reason!="CrashLoopBackOff"}[15m:])) > 0.8
       for: 1h
       labels:
         scope: project
