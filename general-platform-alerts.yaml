@@ -5,8 +5,8 @@ metadata:
   labels:
     prometheus: general-platform-alerts
     role: general-platform-alert-rules
-    app: prometheus-operator
-    release: prometheus-operator
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
   name: general-platform-alerts
 spec:
   groups:

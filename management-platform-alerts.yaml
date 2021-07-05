@@ -20,4 +20,4 @@ spec:
         resolves: never
         scope: platform
       annotations:
-        message: 'Job {{ $labels.job_name }} has failed in namespace {{ $labels.namespace }}!'
+        message: 'Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete.  Removing the failed job after investigation should clear this alert.'
