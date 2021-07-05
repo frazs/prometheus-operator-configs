@@ -174,6 +174,11 @@ inhibit_rules:
     source_match_re:
       alertname: '(ContinuousVeleroBackupPartialFailure|VeleroHourlyBackupPartialFailure)'
     equal: ['cluster', 'schedule']
+  - target_match:
+      alertname: 'JobFailed'
+    source_match:
+      alertname: 'BackupJobFailed'
+    equal: ['cluster', 'job_name']
 
 templates:
 - '*.tmpl'
