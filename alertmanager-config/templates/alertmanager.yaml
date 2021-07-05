@@ -62,85 +62,118 @@ receivers:
     title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
     text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
 - name: black_hole #Empty default receiver
-# To do: come up with a low/info-severity route, or else configure Prometheus to not send low/info-severity to AlertManager.
-# Ref: https://github.com/prometheus/alertmanager/issues/428#issuecomment-468952018
 route:
   ### MEMO: For multi-cluster AlertManager, group by 'cluster' too
-  group_by: ['alertname', 'namespace']
+  group_by: ['cluster', 'alertname', 'namespace']
   group_interval: 10m
   group_wait: 2m
   # repeat_interval cannot be greater than alertmanagerSpec retention
   repeat_interval: 1w
   receiver: black_hole
   routes:
-  # Slack alerts
-  - receiver: cloud_slack
-    match_re:
-      severity: major|urgent
+  ### PLATFORM-WIDE ALERTS
+  - match_re:
+      scope: platform
+    receiver: black_hole
     routes:
-    - receiver: cloud_slack_no_resolve
-      match_re: 
-        resolves: never
-    continue: true
-  # Email alerts
-  - receiver: email
-    match_re:
-      severity: urgent
+    - match_re:
+        severity: major|urgent
+      receiver: cloud_slack
+      routes:
+      - match_re:
+          resolves: never
+        receiver: cloud_slack_no_resolve
+      continue: true
+    - match_re:
+        severity: urgent
+      receiver: email
+      routes:
+      - match_re:
+          resolves: never
+        receiver: email_no_resolve
+    - match_re:
+        severity: testing_major|testing_urgent
+      receiver: test_slack
+      routes:
+      - match_re:
+          resolves: never
+        receiver: test_slack_no_resolve
+      continue: true
+    - match_re:
+        severity: testing_urgent
+      receiver: test_email
+      routes:
+      - match_re:
+          resolves: never
+        receiver: test_email_no_resolve
+  ### PLATFORM PROJECT-SPECIFIC ALERTS
+  - match_re:
+      scope: project
+      namespace: cert-manager|ci|cloudops|default|elastic-system|gatekeeper-system|istio-operator|istio-system|kube-node-lease|kube-public|kube-system|kubecost|logging|monitoring|starboard|starboard-operator|twistlock|velero
+    receiver: black_hole
     routes:
-    - receiver: email_no_resolve
-      match_re:
-        resolves: never
-  ### TESTING ROUTES
-  # Test Slack alerts
-  - receiver: test_slack
-    match_re:
-      severity: testing_major|testing_urgent
-    routes:
-    - receiver: test_slack_no_resolve
-      match_re: 
-        resolves: never
-    continue: true
-  # Test email alerts
-  - receiver: test_email
-    match_re:
-      severity: testing_urgent
-    routes:
-    - receiver: test_email_no_resolve
-      match_re:
-        resolves: never
-### MEMO: Add cluster to equal for multi-cluster AlertManager inhibitions
+    - match_re:
+        severity: major|urgent
+      receiver: cloud_slack
+      routes:
+      - match_re:
+          resolves: never
+        receiver: cloud_slack_no_resolve
+      continue: true
+    - match_re:
+        severity: urgent
+      receiver: email
+      routes:
+      - match_re:
+          resolves: never
+        receiver: email_no_resolve
+    - match_re:
+        severity: testing_major|testing_urgent
+      receiver: test_slack
+      routes:
+      - match_re:
+          resolves: never
+        receiver: test_slack_no_resolve
+      continue: true
+    - match_re:
+        severity: testing_urgent
+      receiver: test_email
+      routes:
+      - match_re:
+          resolves: never
+        receiver: test_email_no_resolve
 inhibit_rules:
   # Don't alert generic NodeNotReady when there is a known cause
   - target_match:
       alertname: 'NodeNotReady'
     source_match_re:
       alertname: '(NodeDiskPressure|NodeMemoryPressure|NodePIDPressure|NodeMemoryPressure|NodeNetworkUnavailable)'
-    equal: ['node']
+    equal: ['cluster', 'node']
   - target_match:
       alertname: 'NodeLowPodCapacity'
     source_match:
       alertname: 'NodePodsFull'
-    equal: ['node']
+    equal: ['cluster', 'node']
   - target_match:
       alertname: 'NodepoolLowPodCapacity'
     source_match:
       alertname: 'NodepoolPodsFull'
-    equal: ['label_agentpool']
+    equal: ['cluster', 'label_agentpool']
   - target_match:
       alertname: 'ManyAlertsFiring'
     source_match:
       alertname: 'ManyManyAlertsFiring'
-    equal: ['alertfiring', 'namespace']
+    equal: ['cluster', 'alertfiring', 'namespace']
   - target_match:
       alertname: 'VeleroBackupFailure'
-    source_match:
-      alertname: 'ContinuousVeleroBackupFailure'
-    equal: ['schedule']
+    source_match_re:
+      alertname: '(ContinuousVeleroBackupFailure|VeleroHourlyBackupFailure)'
+    equal: ['cluster', 'schedule']
   - target_match:
       alertname: 'VeleroBackupPartialFailure'
-    source_match:
-      alertname: 'ContinuousVeleroBackupPartialFailure'
-    equal: ['schedule']
+    source_match_re:
+      alertname: '(ContinuousVeleroBackupPartialFailure|VeleroHourlyBackupPartialFailure)'
+    equal: ['cluster', 'schedule']
 
 templates:
 - '*.tmpl'
