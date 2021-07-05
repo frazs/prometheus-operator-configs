@@ -1,26 +1,18 @@
-#kubectl apply -f alert-tests.yaml -n monitoring
-#ES rules adapted from https://awesome-prometheus-alerts.grep.to/rules#elasticsearch
-#^To do: confirm format and migrate to own file
+#These ElasticSearch exporter tests are old (early 2020) and not in present use.
+#kubectl apply -f es-exporter-alert-tests.yaml -n monitoring
+#Rules adapted from https://awesome-prometheus-alerts.grep.to/rules#elasticsearch
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   creationTimestamp: null
   labels:
-    prometheus: alert-tests
-    role: alert-rules
-    app: prometheus-operator
-    release: prometheus-operator
-  name: prometheus-alert-tests
+    prometheus: es-exporter-alert-tests
+    role: es-exporter-alert-test-rules
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
+  name: es-exporter-alert-tests
 spec:
   groups:
-  - name: alert-tests.rules
-    rules:
-    - alert: NodeGreyFailure # EHashman's example, may need to adjust for what's unusual 
-      expr: scrape_duration_seconds{job="node"} > 2
-      labels:
-        severity: warning
-      annotations:
-        message: "{{ $labels.instance }} has a scrape duration over 2s (current value: {{ $value }}s)"
   - name: elasticsearch-exporter.rules
     rules:
     - record: elasticsearch_filesystem_data_used_percent

@@ -3,9 +3,9 @@ kind: PrometheusRule
 metadata:
   creationTimestamp: null
   labels:
-    app: prometheus-operator
+    app: kube-prometheus-stack
     prometheus: general-project-alerts
-    release: prometheus-operator
+    release: kube-prometheus-stack
     role: general-project-alert-rules
   name: general-project-alerts
   namespace: monitoring
