@@ -1,5 +1,7 @@
 # prometheus-operator-configs
 
+**This README is out of date**. Certain sections no longer apply after upgrading to Kube-Prometheus-Stack and/or applying changes through terraform instead of manualy. Configurations in the repository are still maintained as references. 
+
 Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager, Grafana, and various exporters. Work in progress.
 
 The code snippets in the following notes are listed for reference and may later be pipelined or refactored. **Note that they do not include the -n flag**: on my end, [kubens](https://github.com/ahmetb/kubectx) is used to automaticaly enforce the 'monitoring' namespace on kubectl commands. 

@@ -1,5 +1,4 @@
 #alertmanager configuration secret
-#To-do: Pipeline this
 global:
   resolve_timeout: 5m
   smtp_smarthost: {{ .Values.smtp_smarthost | squote }}
@@ -37,10 +36,50 @@ receivers:
     color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
     title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
     text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
-- name: cloud_slack_no_resolve
+- name: cns_dev
   slack_configs: 
   - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
-    channel: '#prometheus-alerts'
+    channel: '#cns-dev-alerts'
+    send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cns_dev_no_resolve
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#cns-dev-alerts'
+    send_resolved: false
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cns_non_prod
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#cns-non-prod-alerts'
+    send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cns_non_prod_no_resolve
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#cns-non-prod-alerts'
+    send_resolved: false
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cns_prod
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#cns-non-prod-alerts'
+    send_resolved: true
+    color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
+    title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
+    text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
+- name: cns_prod_no_resolve
+  slack_configs: 
+  - api_url: {{ .Values.cloud_slack_incoming_webhook | squote }}
+    channel: '#cns-non-prod-alerts'
     send_resolved: false
     color: {{`'{{ template "slack.slackcustom.color" . }}'`}}
     title: {{`'{{ template "slack.slackcustom.title" . }}'`}}
@@ -63,7 +102,6 @@ receivers:
     text: {{`'{{ template "slack.slackcustom.text" . }}'`}}
 - name: black_hole #Empty default receiver
 route:
-  ### MEMO: For multi-cluster AlertManager, group by 'cluster' too
   group_by: ['cluster', 'alertname', 'namespace']
   group_interval: 10m
   group_wait: 2m
@@ -81,8 +119,26 @@ route:
       receiver: cloud_slack
       routes:
       - match_re:
-          resolves: never
-        receiver: cloud_slack_no_resolve
+          cluster: k8s-cancentral-01-infratest
+        receiver: cns_dev
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_dev_no_resolve
+      - match_re:
+          cluster: k8s-cancentral-01-development|k8s-cancentral-01-test|k8s-cancentral-02-innovation
+        receiver: cns_non_prod
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_non_prod_no_resolve
+      - match_re:
+          cluster: k8s-cancentral-01-production|k8s-cancentral-01-management|ingress-paz-cc-00-aks
+        receiver: cns_prod
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_prod_no_resolve
       continue: true
     - match_re:
         severity: urgent
@@ -117,8 +173,26 @@ route:
       receiver: cloud_slack
       routes:
       - match_re:
-          resolves: never
-        receiver: cloud_slack_no_resolve
+          cluster: k8s-cancentral-01-infratest
+        receiver: cns_dev
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_dev_no_resolve
+      - match_re:
+          cluster: k8s-cancentral-01-development|k8s-cancentral-01-test|k8s-cancentral-02-innovation
+        receiver: cns_non_prod
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_non_prod_no_resolve
+      - match_re:
+          cluster: k8s-cancentral-01-production|k8s-cancentral-01-management|ingress-paz-cc-00-aks
+        receiver: cns_prod
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_prod_no_resolve
       continue: true
     - match_re:
         severity: urgent
