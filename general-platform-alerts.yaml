@@ -10,16 +10,24 @@ metadata:
   name: general-platform-alerts
 spec:
   groups:
-  - name: certificates.rules
+  - name: blackbox.rules
     rules:
     - alert: SSLCertExpiringSoon
-      expr: sum by (target, instance) (probe_ssl_earliest_cert_expiry{job="blackbox-exporter-prometheus-blackbox-exporter"} - time()) < 86400 * 20
+      expr: sum by (target, instance) (probe_ssl_earliest_cert_expiry - time()) < 86400 * 20
       for: 2m
       labels:
         severity: urgent
         scope: platform
       annotations:
         message: 'SSL certificate for {{ $labels.instance }} expires in less than 20 days.'
+    - alert: ProbeFailure
+      expr: sum by (target, instance) (probe_success) != 1
+      for: 15s
+      labels:
+        severity: urgent
+        scope: platform
+      annotations:
+        message: 'The {{ $labels.target }} probe is failing. Port-forward into 9115 on the blackbox pod for {{ $labels.instance }} debug information. Scroll to the bottom for older failures.'
   - name: jobs.rules
     rules:
     - alert: CompletedJobsNotCleared
