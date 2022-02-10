@@ -4,7 +4,7 @@
 
 resource "helm_release" "blackbox-exporter" {
   name                = "blackbox-exporter"
-  namespace           = module.namespace_monitoring.name
+  namespace           = monitoring
   # repository_username = var.docker_username
   # repository_password = var.docker_password
   repository          = "https://prometheus-community.github.io/helm-charts/"
