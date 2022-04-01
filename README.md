@@ -1,27 +1,33 @@
 # prometheus-operator-configs
 
-**This README is out of date**. Certain sections no longer apply after upgrading to Kube-Prometheus-Stack and/or applying changes through terraform instead of manualy. Configurations in the repository are still maintained as references. 
+A collection of example monitoring component configurations intended for use with the Prometheus Operator as installed through [Kube Prometheus-Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
 
-Custom configurations the Prometheus Operator, spanning Prometheus, AlertManager, Grafana, and various exporters. Work in progress.
+Provided on an as-is basis for reference. May be out of date.
 
-The code snippets in the following notes are listed for reference and may later be pipelined or refactored. **Note that they do not include the -n flag**: on my end, [kubens](https://github.com/ahmetb/kubectx) is used to automaticaly enforce the 'monitoring' namespace on kubectl commands. 
+## Notes
 
-### To apply the cluster tag 
+### Alert labels
 
-In the Prometheus Operator terraform script under prometheus.prometheusSpec, add: 
+The alert labels used in these examples, `severity`, `scope`, and `resolves` are all arbitrarily defined for the specific routing desired. They do not need to be used in this manner, with these names, or at all. 
+
+The `resolves: never` label is used to handle not reporting resolutions for certain increment based alerts that, by design, always immediately resolve themselves. 
+
+### To apply the cluster tag to alerts
+
+In kube-prometheus-stack values, under `prometheus.prometheusSpec`, add: 
 
 ```
 externalLabels:
   cluster: your cluster name
 ```
 
-externalLabels should be flush with storageSpec.
+`externalLabels` should be flush with `storageSpec`.
 
-An example usecase for this is to differentiate multiple clusters' AlertManagers alerting to the same Slack channel.
+An example usecase for this is to differentiate multiple clusters' Alertmanagers alerting to the same notification channel.
 
 ### To add more data sources to Grafana 
 
-Such as the Prometheus of other clusters, in the Prometheus Operator terraform script under grafana and flush with 'ingress', add (example):
+Such as the Prometheus of other clusters. In kube-prometheus-stack values, under `grafana` and flush with `ingress`, add (example):
 
 ```
 additionalDataSources:
@@ -34,34 +40,25 @@ additionalDataSources:
 
 Other kinds of data sources [may have additional properties, such as credentials](https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources). 
 
-Presently, I have had some issues with having the relevant helm changes recognized when going through the Prometheus Operator terraform script pipelines. They have been pushed through with local terraform scripts and additional inconsequential changes. [This may be an issue with helm version 2.13.1](https://github.com/helm/helm/issues/5915).
+The data source changes are not applied automatically, but require a restart of the Grafana part. Consider a rollout restart of the Grafana deployment. If an automatic workaround for this is needed, timestamp pod annotations are one option - [see the last comments here](https://github.com/coreos/prometheus-operator/issues/1909).
 
-The data source changes are not applied automatically, but follow a reset through `kubectl scale deploy prometheus-operator-grafana --replicas=0` and `kubectl scale deploy prometheus-operator-grafana --replicas=1`. If an automatic workaround for this is needed, timestamp pod annotations are one option - [see the last comments here](https://github.com/coreos/prometheus-operator/issues/1909).
+### To apply PrometheusRules
 
-### To apply Prometheus rules
+Apply PrometheusRule YAML manifests similar to the examples provided in this repo. When applying the rules to the Prometheus isntance installed by default through `kube-prometheus-stack`, ensure that the value of the `release` label matches the Helm release name corresponding to `kube-prometheus-stack`, [unless its `ruleSelector` has been overriden](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/templates/prometheus/prometheus.yaml#L202). Otherwise, match the `ruleSelector` of the desired Prometheus instance. Check and align with any `ruleNamespaceSelector` restrictions in place.
 
- `kubectl apply -f alert-tests.yaml` (or as many similar yamls as desired; they are picked up automatically as long as they are defined as a PrometheusRule and as corresponding to the appropriate namespace)
+### To apply Alertmanager configuration
 
-
-### To apply AlertManager configuration
+The Prometheus Operator Alertmanager expects its YAML configuarion in a secret as a base64 value of the key `alertmanager.yaml`. If notification templates are used, they should be separate data (also base64 encoded values) in the same secret, with keys that match the specification in the Alertmanager config. For example, if the Alertmanager config specifies:
 
 ```
-kubectl create secret generic alertmanager-prometheus-operator-alertmanager --from-literal=alertmanager.yaml="$(helm template ./alertmanager-config -f alertmanager-config-overrides.yaml | awk '{if(NR>1)print}')" --from-file=alertmanager-tmpl/slackcustom.tmpl --from-file=alertmanager-tmpl/email.html --dry-run -o yaml | kubectl apply -f -
+templates:
+- '*.tmpl'
+- '*.html'
 ```
 
-alertmanager-config-overrides.yaml above is gitignored and intended for personalized private elements such as API keys and SMTP credentials. Its keys must match [alertmanger-config/values.yaml](alertmanager-config/values.yaml) when those values are used.
+Then `slack.tmpl: <base64 encoded template>` and `email.html: <base64 encoded template>` are acceptable.
 
-The Prometheus Operator Alertmanager expects its configuarion as a base64 encoded secret (and "tmpl" template files used within the configuration are additional secrets). This makes it difficult to have those configurations themselves reference private variables. In order to allow the configuration to be shared publically and easily personalized, Helm templating is used to override private variables with private values. (To do: confirm how this works in the context of a pipeline)
+This can be done manually by creating a secret with multiple `--from-file` specifications or values in Helm charts that include Alertmanager.
 
-Creating a dry run of a secret and then applying it updates the existing secret without running afoul of internal versioning, and without having to manually encode the contents.
-
-The output of a helm template command begins with a first line of "---". This breaks applying, so awk is used to remove it.
-
-
-Diverging from Helm chart best practices, the alertmanager.yaml template contains most of its values instead of those values being defined in values.yaml. This is due to two helm template YAML issues at the time of development: 
-
-1. A lot is defined in lists, and lists get overriden completely instead of partially (i.e. the entire nest is required)
-2. Retrieved URLS lose the quotes around them in a way that cannot be escaped, and the result cannot be parsed. If the URL is inside of a list, the quotes cannot be easily added after the fact: as per (1), the entire list is pulled in at once.
-
-### To configure a blackbox exporter:
-Refer to the [helm chart repo](https://github.com/helm/charts/tree/master/stable/prometheus-blackbox-exporter) and [sample configuration](blackbox-exporter/config.yaml). Note the labels for the Prometheus Operator to pick up the service. This may be done as part of a helm release (public example to come).
+### To configure a blackbox exporter
+Refer to the [Blackbox Exporter Helm chart repo](https://github.com/helm/charts/tree/master/stable/prometheus-blackbox-exporter) and [sample Terraform helm_release configuration](blackbox-exporter-example.tf). Note the labels for the Prometheus Operator to pick up the service.

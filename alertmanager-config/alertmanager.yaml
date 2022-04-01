@@ -1,0 +1,286 @@
+global:
+  resolve_timeout: 6m
+  smtp_smarthost: 'example.example.com:25'
+  smtp_from: 'donotreply@example.com'
+  smtp_auth_username: 'EXAMPLE'
+  smtp_auth_password: 'EXAMPLE'
+  smtp_require_tls: true
+  receivers:
+  - name: email
+    email_configs:
+    - to: 'example@example.com'
+      send_resolved: true
+      html: '{{ template "email.email.html" . }}'
+  - name: email_no_resolve
+    email_configs:
+    - to: 'example@example.com'
+      send_resolved: false
+      html: '{{ template "email.email.html" . }}'
+  - name: test_email
+    email_configs:
+    - to: 'testexample@example.com'
+      send_resolved: true
+      html: '{{ template "email.email.html" . }}'
+  - name: test_email_no_resolve
+    email_configs:
+    - to: 'testexample@example.com'
+      send_resolved: false
+      html: '{{ template "email.email.html" . }}'
+  - name: cloud_slack
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/EXAMPLE/EXAMPLE'
+      channel: '#prometheus-alerts'
+      send_resolved: true
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+  - name: cns_dev
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/DEV/EXAMPLE'
+      channel: '#cns-dev-alerts'
+      send_resolved: true
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/dev"
+      send_resolved: true
+  - name: cns_dev_no_resolve
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/DEV/EXAMPLE'
+      channel: '#cns-dev-alerts'
+      send_resolved: false
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/dev"
+      send_resolved: false
+  - name: cns_non_prod
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/NONPROD/EXAMPLE'
+      channel: '#cns-non-prod-alerts'
+      send_resolved: true
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/nonprod"
+      send_resolved: true
+  - name: cns_non_prod_no_resolve
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/NONPROD/EXAMPLE'
+      channel: '#cns-non-prod-alerts'
+      send_resolved: false
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/nonprod"
+      send_resolved: false
+  - name: cns_prod
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/PROD/EXAMPLE'
+      channel: '#cns-prod-alerts'
+      send_resolved: true
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/prod"
+      send_resolved: true
+  - name: cns_prod_no_resolve
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/PROD/EXAMPLE'
+      channel: '#cns-prod-alerts'
+      send_resolved: false
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/prod"
+      send_resolved: false
+  - name: cns_testing
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/TESTING/EXAMPLE'
+      channel: '#resolve'
+      send_resolved: true
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/testing"
+      send_resolved: true
+  - name: cns_testing_no_resolve
+    slack_configs:
+    - api_url: 'https://hooks.slack.com/services/EXAMPLE/TESTING/EXAMPLE'
+      channel: '#no-resolve'
+      send_resolved: false
+      color: '{{ template "slack.slackcustom.color" . }}'
+      title: '{{ template "slack.slackcustom.title" . }}'
+      text: '{{ template "slack.slackcustom.text" . }}'
+    webhook_configs:
+    - url: "http://prometheus-msteams:2000/testing"
+      send_resolved: false
+  - name: black_hole #Empty default receiver
+  route:
+    group_by: ['cluster', 'alertname', 'namespace']
+    group_interval: 10m
+    group_wait: 2m
+    # repeat_interval cannot be greater than alertmanagerSpec retention
+    repeat_interval: 1w
+    receiver: black_hole
+    routes:
+    ### CLUSTER-WIDE ALERTS
+    - match_re:
+        scope: cluster
+      receiver: black_hole
+      routes:
+      - match_re:
+          severity: minor|major
+        receiver: cloud_slack
+        routes:
+        - match_re:
+            cluster: k8s-cancentral-01-infratest
+          receiver: cns_dev
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_dev_no_resolve
+        - match_re:
+            cluster: k8s-cancentral-01-development|k8s-cancentral-01-test|k8s-cancentral-02-innovation
+          receiver: cns_non_prod
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_non_prod_no_resolve
+        - match_re:
+            cluster: k8s-cancentral-01-production|k8s-cancentral-01-management|ingress-paz-cc-00-aks
+          receiver: cns_prod
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_prod_no_resolve
+        continue: true
+      - match_re:
+          severity: major
+        receiver: email
+        routes:
+        - match_re:
+            resolves: never
+          receiver: email_no_resolve
+      - match_re:
+          severity: testing_minor|testing_major
+        receiver: cns_testing
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_testing_no_resolve
+        continue: true
+      - match_re:
+          severity: testing_major
+        receiver: test_email
+        routes:
+        - match_re:
+            resolves: never
+          receiver: test_email_no_resolve
+    ### NAMESPACE-SPECIFIC ALERTS
+    - match_re:
+        scope: namespace
+        namespace: cert-manager|ci|cloudops|default|elastic-system|gatekeeper-system|istio-operator|istio-system|kube-node-lease|kube-public|kube-system|kubecost|logging|monitoring|starboard|starboard-operator|twistlock|velero
+      receiver: black_hole
+      routes:
+      - match_re:
+          severity: minor|major
+        receiver: cloud_slack
+        routes:
+        - match_re:
+            cluster: k8s-cancentral-01-infratest
+          receiver: cns_dev
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_dev_no_resolve
+        - match_re:
+            cluster: k8s-cancentral-01-development|k8s-cancentral-01-test|k8s-cancentral-02-innovation
+          receiver: cns_non_prod
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_non_prod_no_resolve
+        - match_re:
+            cluster: k8s-cancentral-01-production|k8s-cancentral-01-management|ingress-paz-cc-00-aks
+          receiver: cns_prod
+          routes:
+          - match_re:
+              resolves: never
+            receiver: cns_prod_no_resolve
+        continue: true
+      - match_re:
+          severity: major
+        receiver: email
+        routes:
+        - match_re:
+            resolves: never
+          receiver: email_no_resolve
+      - match_re:
+          severity: testing_minor|testing_major
+        receiver: cns_testing
+        routes:
+        - match_re:
+            resolves: never
+          receiver: cns_testing_no_resolve
+        continue: true
+      - match_re:
+          severity: testing_major
+        receiver: test_email
+        routes:
+        - match_re:
+            resolves: never
+          receiver: test_email_no_resolve
+  inhibit_rules:
+    # Don't alert generic NodeNotReady when there is a known cause
+    - target_match:
+        alertname: 'NodeNotReady'
+      source_match_re:
+        alertname: '(NodeDiskPressure|NodeMemoryPressure|NodePIDPressure|NodeMemoryPressure|NodeNetworkUnavailable)'
+      equal: ['cluster', 'node']
+    - target_match:
+        alertname: 'NodeLowPodCapacity'
+      source_match:
+        alertname: 'NodePodsFull'
+      equal: ['cluster', 'node']
+    - target_match:
+        alertname: 'NodepoolLowPodCapacity'
+      source_match:
+        alertname: 'NodepoolPodsFull'
+      equal: ['cluster', 'label_agentpool']
+    - target_match:
+        alertname: 'ManyAlertsFiring'
+      source_match:
+        alertname: 'ManyManyAlertsFiring'
+      equal: ['cluster', 'alertfiring', 'namespace']
+    - target_match:
+        alertname: 'VeleroBackupFailure'
+      source_match_re:
+        alertname: '(ContinuousVeleroBackupFailure|VeleroHourlyBackupFailure)'
+      equal: ['cluster', 'schedule']
+    - target_match:
+        alertname: 'VeleroBackupPartialFailure'
+      source_match_re:
+        alertname: '(ContinuousVeleroBackupPartialFailure|VeleroHourlyBackupPartialFailure)'
+      equal: ['cluster', 'schedule']
+    - target_match:
+        alertname: 'JobFailed'
+      source_match:
+        alertname: 'BackupJobFailed'
+      equal: ['cluster', 'job_name']
+    - target_match:
+        alertname: 'PodNotReady'
+      source_match: 
+        alertname: 'ContainerWaiting'
+      equal: ['cluster', 'namespace', 'pod']
+      
+  templates:
+  - '*.tmpl'
+  - '*.html'

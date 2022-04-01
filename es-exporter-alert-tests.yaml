@@ -1,13 +1,9 @@
-#These ElasticSearch exporter tests are old (early 2020) and not in present use.
-#kubectl apply -f es-exporter-alert-tests.yaml -n monitoring
-#Rules adapted from https://awesome-prometheus-alerts.grep.to/rules#elasticsearch
+# These ElasticSearch exporter tests are old (early 2020) and not in present use.
+# Rules adapted from https://awesome-prometheus-alerts.grep.to/rules#elasticsearch
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  creationTimestamp: null
   labels:
-    prometheus: es-exporter-alert-tests
-    role: es-exporter-alert-test-rules
     app: kube-prometheus-stack
     release: kube-prometheus-stack
   name: es-exporter-alert-tests

@@ -1,0 +1,78 @@
+# Requires and is defined in prometheus-msteams: https://github.com/prometheus-msteams/prometheus-msteams/tree/master/chart/prometheus-msteams
+# The Silence generation link cannot be a PotentialAction: it contains a JSON object, but ViewAction does not support a closed set of {}s even when escaped.
+{{ define "teams.card" }}
+    {
+      "@type": "MessageCard",
+      "@context": "http://schema.org/extensions",
+      "themeColor": "{{- if eq .Status "resolved" -}}2DC72D
+                    {{- else if eq .Status "firing" -}}
+                        {{- if eq .CommonLabels.severity "major" -}}8C1A1A
+                        {{- else -}}FFA500{{- end -}}
+                    {{- else -}}808080{{- end -}}",
+      "summary": "{{- if eq .CommonAnnotations.summary "" -}}
+                      {{- if eq .CommonAnnotations.message "" -}}
+                        {{- if eq .CommonLabels.alertname "" -}}
+                          Prometheus Alert
+                        {{- else -}}
+                          {{- .CommonLabels.alertname -}}
+                        {{- end -}}
+                      {{- else -}}
+                        {{- .CommonAnnotations.message -}}
+                      {{- end -}}
+                  {{- else -}}
+                      {{- .CommonAnnotations.summary -}}
+                  {{- end -}}",
+      "title": "[{{ .Status | toUpper }}:{{ if eq .Status "firing" }}{{ .Alerts.Firing | len }}{{ else }}{{ .Alerts.Resolved | len }}{{ end }}] {{ .CommonLabels.alertname }}",
+      "text": "{{- if ne .ExternalURL "http://none" -}}[Create a Silence]({{ .ExternalURL }}/#/silences/new?filter=%7B{{$c := counter}}{{ range $key, $value := .CommonLabels }}{{if call $c}}%22%2C%20{{ end }}{{ $key }}%3D%22{{ $value }}{{- end }}%22%7D){{- end -}}",
+      "sections": [
+      {{- range $index, $alert := .Alerts }}{{- if $index }},{{- end }}
+        {
+          "text": "{{ $alert.Annotations.message }}",
+          "facts": [
+            {
+              {{- if eq $alert.Status "firing" -}}
+                "name": "since",
+                "value": "{{ $alert.StartsAt.Format "02 Jan 15:04 UTC" }}"
+              {{- else -}}
+                "name": "resolved",
+                "value": "{{ $alert.EndsAt.Format "02 Jan 15:04 UTC" }}"
+              {{- end -}}
+            },
+            {{$c := counter}}{{ range $key, $value := $alert.Labels }}{{if call $c}},{{ end }}
+            {
+              {{- if eq $key "alertname" -}}
+              {{ else if eq $key "prometheus" -}}
+              {{ else if eq $key "severity" -}}
+              {{ else if eq $key "scope" -}}
+              {{ else -}}
+                "name": "{{ $key }}",
+                "value": "{{ $value }}"
+              {{- end -}}
+            }
+            {{- end }}
+          ],
+          "markdown": true
+        }
+        {{- end }}
+      ],
+      "potentialAction": [
+        {{ $runbook := (index .Alerts 0).Annotations.runbook }}
+        {{- if ne (printf "%.11s" (index .Alerts 0).GeneratorURL) "http://none" -}}
+        {
+          "@context": "http://schema.org",
+          "@type": "ViewAction",
+          "name": "Graph",
+          "target": ["{{ (index .Alerts 0).GeneratorURL }}"]
+        }{{- if $runbook -}},{{- end }}
+        {{- end }}
+        {{- if $runbook -}}
+        {
+          "@context": "http://schema.org",
+          "@type": "ViewAction",
+          "name": "Runbook",
+          "target": ["{{ $runbook }}"]
+        }
+        {{- end }}
+      ]
+    }
+    {{ end }}
