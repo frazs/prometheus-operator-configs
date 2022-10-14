@@ -238,4 +238,30 @@ spec:
         scope: cluster
       annotations:
         message: 'Hourly partial failure in backup schedule {{ $labels.schedule }}.'
-        
+  - name: certmanager.rules
+    rules:
+    - alert: certFailingToRenew
+      expr: sum by (name) (certmanager_certificate_ready_status{condition="Unknown"}==1 OR certmanager_certificate_ready_status{condition="False"}==1) AND (certmanager_certificate_renewal_timestamp_seconds-time()<0)
+      for: 10m
+      labels:
+        severity: major
+        scope: cluster
+      annotations:
+        message: 'The certificate named {{ $labels.name }} is failing to renew'
+    - alert: certManagerCertFailure
+      expr: sum by (name) (certmanager_certificate_ready_status{condition="Unknown"}==1 OR certmanager_certificate_ready_status{condition="False"}==1) AND (certmanager_certificate_renewal_timestamp_seconds-time()>0)
+      for: 10m
+      labels:
+        severity: major
+        scope: cluster
+      annotations:
+        message: 'The cert-manager certificate ready status named {{ $labels.name }} is not ready and it is not yet time for renewal'
+    - alert: certManagerCertExpired
+      expr: sum by (name) certmanager_certificate_expiration_timestamp_seconds-time()<0
+      for: 2m
+      labels:
+        severity: major
+        scope: cluster
+      annotations:
+        message: 'The cert-manager certificate named {{ $labels.name }} has expired.'
+
